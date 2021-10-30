@@ -30,7 +30,7 @@
   ],
   "license": "AGPL-3.0+",
   "dependencies": {
-    "bcrypt": "^0.8.5",
+    "bcrypt": "5.0.1",
     "bluebird": "^3.3.3",
     "body-parser": "^1.15.0",
     "bootstrap": "^3.3.6",
