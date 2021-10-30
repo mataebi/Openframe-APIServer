@@ -16,8 +16,14 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+data_source_conf = {}
 
-var data_source_conf = {};
+// if LB_DB_MEM_FILE is set, use the file specified to persist the memoryDb data
+if (process.env.LB_DB_MEM_FILE) {
+    data_source_conf['memoryDb'] = {
+        file: process.env.LB_DB_MEM_FILE
+    }
+}
 
 // if LP_DB_DS_CONNECTOR is set, assume we're using a custom db connector
 if (process.env.LB_DB_DS_CONNECTOR) {
