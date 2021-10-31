@@ -52,5 +52,9 @@
   "Channel": {
     "dataSource": "memoryDb",
     "public": true
+  },
+  "Service": {
+    "dataSource": "memoryDb",
+    "public": true
   }
 }
