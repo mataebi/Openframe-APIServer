@@ -139,9 +139,6 @@
       "principalId": "$everyone",
       "permission": "ALLOW",
       "property": [
-        "find",
-        "findById",
-        "findOne",
         "cfg",
         "__get__created_artwork"
       ]
