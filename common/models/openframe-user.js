@@ -3,9 +3,7 @@ var loopback = require('loopback'),
     path = require('path'),
     debug = require('debug')('openframe:model:OpenframeUser');
 
-
 module.exports = function(OpenframeUser) {
-
 
     /**
      * Disable specific default remote methods
@@ -76,18 +74,17 @@ module.exports = function(OpenframeUser) {
      * CUSTOM remote methods
      */
 
-
     // Get configuration via REST endpoint
-    OpenframeUser.config = function(cb) {
+    OpenframeUser.cfg = function(cb) {
         var config = {
             pubsub_url: OpenframeUser.app.get('ps_url')
         };
         cb(null, config);
     };
 
-    // Expose all_frames remote method
+    // Expose config remote method
     OpenframeUser.remoteMethod(
-        'config', {
+        'cfg', {
             description: 'Get some general config info from the API server.',
             accepts: [],
             http: {
@@ -95,7 +92,7 @@ module.exports = function(OpenframeUser) {
             },
             returns: {
                 arg: 'config',
-                type: 'Object'
+                type: 'object'
             }
         }
     );
