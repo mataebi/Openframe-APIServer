@@ -27,7 +27,6 @@
   },
   "hidden": [
     "emailVerified",
-    "email",
     "password",
     "settings"
   ],
