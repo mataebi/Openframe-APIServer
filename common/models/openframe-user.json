@@ -141,7 +141,7 @@
         "find",
         "findById",
         "findOne",
-        "config",
+        "cfg",
         "__get__created_artwork"
       ]
     },
