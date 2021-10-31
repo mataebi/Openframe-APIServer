@@ -28,12 +28,14 @@
   "hidden": [
     "emailVerified",
     "password",
+    "passwordConfirm",
     "settings"
   ],
   "protected": [
     "email",
     "created",
     "modified",
+    "passwordConfirm",
     "settings"
   ],
   "scope": {
