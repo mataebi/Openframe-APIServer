@@ -138,7 +138,10 @@ module.exports = function(OpenframeUser) {
             },
             returns: {
                 arg: 'frames',
-                type: 'Array'
+                type: 'array',
+                item: {
+                  type: 'Frame'
+                }
             }
         }
     );
