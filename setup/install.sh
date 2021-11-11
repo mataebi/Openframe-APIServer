@@ -31,7 +31,7 @@ APPDIR=$HOMEDIR/Openframe-APIServer
   API_EXPOSED_URL="$FULLURL/v0"
 
   ### Ask for API server port number
-  [ -r $APPDIR/.env ] && API_PORT=$(grep API_PORT "$APPDIR/.env" | tr -d "'" | cut -d"=" -f2)
+  [ -r $APPDIR/.env ] && API_PORT=$(grep API_PORT "$APPDIR/.env" | sed "s/.*='*\([0-9]\+\).*/\1/")
   [ -z "$API_PORT" ] || [ "$API_PORT" == "null" ] && API_PORT="8888"
   while [ 1 ]; do
     read -p "Which port number should be used ($API_PORT): " NAPI_PORT
@@ -68,7 +68,7 @@ APPDIR=$HOMEDIR/Openframe-APIServer
   LB_EMAIL_DS_TYPE='SMTP' # default
 
   ### Ask for mail server port number
-  [ -r $APPDIR/.env ] && EMAILPORT=$(grep LB_EMAIL_DS_PORT "$APPDIR/.env" | tr -d "'" | cut -d"=" -f2)
+  [ -r $APPDIR/.env ] && EMAILPORT=$(grep LB_EMAIL_DS_PORT "$APPDIR/.env" | sed "s/.*='*\([0-9]\+\).*/\1/")
   [ -z "$EMAILPORT" ] || [ "$EMAILPORT" == "null" ] && EMAILPORT="465"
   while [ 1 ]; do
     read -p "Which port number should be used for e-mail ($EMAILPORT): " NEMAILPORT
@@ -105,7 +105,7 @@ APPDIR=$HOMEDIR/Openframe-APIServer
   PS_HOST=$API_HOST
 
   ### Ask for Pubsub server port number
-  [ -r $APPDIR/.env ] && PS_PORT=$(grep PS_PORT "$APPDIR/.env" | tr -d "'" | cut -d"=" -f2)
+  [ -r $APPDIR/.env ] && PS_PORT=$(grep PS_PORT "$APPDIR/.env" | sed "s/.*='*\([0-9]\+\).*/\1/")
   [ -z "$PS_PORT" ] || [ "$PS_PORT" == "null" ] && PS_PORT="8899"
   while [ 1 ]; do
     read -p "Which port number should be used ($PS_PORT): " NPS_PORT
