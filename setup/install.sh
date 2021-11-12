@@ -14,37 +14,38 @@ APPDIR=$HOMEDIR/Openframe-APIServer
   ### Get API server URL
   URLPAT='(^https?://[-A-Za-z0-9]+\.[-A-Za-z0-9\.]+(:[0-9]+)?$)|(^$)'
 
-  [ -r $APPDIR/.env ] && FULLURL=$(grep API_EXPOSED_URL "$APPDIR/.env" | tr -d "'" | cut -d"=" -f2 | cut -d"/" -f1-3)
-  [ -z "$FULLURL" ] || [ "$FULLURL" == "null" ] && FULLURL="https://api.openframe.io"
+  [ -r $APPDIR/.env ] && API_FULLURL=$(grep "API_EXPOSED_URL=" "$APPDIR/.env" | tr -d "'" | cut -d"=" -f2 | cut -d"/" -f1-3)
+  [ -z "$API_FULLURL" ] || [ "$API_FULLURL" == "null" ] && API_FULLURL="https://api.openframe.io"
   while [ 1 ]; do
-    read -p "URL to be used for the API server ($FULLURL)? " NFULLURL
-    [[ ! "$NFULLURL" =~ $URLPAT ]] && continue
-    [ ! -z "$NFULLURL" ] && FULLURL=$NFULLURL
+    read -p "URL to be used for the API server ($API_FULLURL)? " NAPIFULLURL
+    [[ ! "$NAPIFULLURL" =~ $URLPAT ]] && continue
+    [ ! -z "$NAPIFULLURL" ] && API_FULLURL=$NAPIFULLURL
     break
   done
 
-  SCHEMA=$(echo $FULLURL | cut -d":" -f1)
-  API_HOST=$(echo $FULLURL | cut -d"/" -f3)
-  DOMAINNAME=$(echo $API_HOST | rev | cut -d'.' -f1-2 | rev)
-  SERVERNAME=$(echo $API_HOST | rev | cut -d'.' -f3- | rev)
+  API_SCHEMA=$(echo $API_FULLURL | cut -d":" -f1)
+  API_HOST=$(echo $API_FULLURL | cut -d"/" -f3)
+  API_DOMAINNAME=$(echo $API_HOST | rev | cut -d'.' -f1-2 | rev)
+  API_SERVERNAME=$(echo $API_HOST | rev | cut -d'.' -f3- | rev)
   # Openframe API host to use. The path used will always be /v0
-  API_EXPOSED_URL="$FULLURL/v0"
+  API_PATH="/v0"
+  API_EXPOSED_URL="${API_FULLURL}${API_PATH}"
 
   ### Ask for API server port number
   [ -r $APPDIR/.env ] && API_PORT=$(grep API_PORT "$APPDIR/.env" | sed "s/.*='*\([0-9]\+\).*/\1/")
-  [ -z "$API_PORT" ] || [ "$API_PORT" == "null" ] && API_PORT="8888"
+  [ -z "$API_PORT" ] || [ "$API_PORT" == "null" ] && API_PORT="3000"
   while [ 1 ]; do
     read -p "Which port number should be used ($API_PORT): " NAPI_PORT
     [[ ! "$NAPI_PORT" =~ (^[0-9]+$)|(^$) ]] && continue
+    [ ! -z $NAPI_PORT ] && [ $NAPI_PORT -gt 65535 ] && continue
     [ ! -z $NAPI_PORT ] && API_PORT=$NAPI_PORT
     break
   done
 
   # External host URLs used for e-mail confirmation links
   # The server cannot be started without these being specified (can even be a dummy)
-  # WEBAPP_EXPOSED_URL='https://oframe.jabr.ch'
-  [ -r $APPDIR/.env ] && WEBAPPURL=$(grep WEBAPP_EXPOSED_URL "$APPDIR/.env" | tr -d "'" | cut -d"=" -f2 | cut -d"/" -f1-3)
-  [ -z "$WEBAPPURL" ] || [ "$WEBAPPURL" == "null" ] && WEBAPPURL="https://openframe.io"
+  [ -r $APPDIR/.env ] && WEBAPPURL=$(grep "WEBAPP_EXPOSED_URL=" "$APPDIR/.env" | tr -d "'" | cut -d"=" -f2 | cut -d"/" -f1-3)
+  [ -z "$WEBAPPURL" ] || [ "$WEBAPPURL" == "null" ] && WEBAPPURL="$API_SCHEMA://$API_DOMAINNAME"
   while [ 1 ]; do
     read -p "URL to be used for the web application server ($WEBAPPURL)? " NWEBAPPURL
     [[ ! "$NWEBAPPURL" =~ $URLPAT ]] && continue
@@ -56,8 +57,8 @@ APPDIR=$HOMEDIR/Openframe-APIServer
   LB_EMAIL_DS_CONNECTOR=mail
   LB_EMAIL_DS_NAME='Email'
 
-  [ -r $APPDIR/.env ] && EMAILHOST=$(grep LB_EMAIL_DS_HOST "$APPDIR/.env" | tr -d "'" | cut -d"=" -f2)
-  [ -z "$EMAILHOST" ] || [ "$EMAILHOST" == "null" ] && EMAILHOST="mail.$DOMAINNAME"
+  [ -r $APPDIR/.env ] && EMAILHOST=$(grep "LB_EMAIL_DS_HOST=" "$APPDIR/.env" | tr -d "'" | cut -d"=" -f2)
+  [ -z "$EMAILHOST" ] || [ "$EMAILHOST" == "null" ] && EMAILHOST="mail.$API_DOMAINNAME"
   while [ 1 ]; do
     read -p "DNS name of the SMTP mail server to be used ($EMAILHOST)? " NEMAILHOST
     [[ ! "$NEMAILHOST" =~ (^[-a-z0-9]+\.[-a-z0-9\.]+$)|(^$) ]] && continue
@@ -73,12 +74,13 @@ APPDIR=$HOMEDIR/Openframe-APIServer
   while [ 1 ]; do
     read -p "Which port number should be used for e-mail ($EMAILPORT): " NEMAILPORT
     [[ ! "$NEMAILPORT" =~ (^[0-9]+$)|(^$) ]] && continue
+    [ ! -z $NEMAILPORT ] && [ $NEMAILPORT -gt 65535 ] && continue
     [ ! -z $NEMAILPORT ] && EMAILPORT=$NEMAILPORT
     break
   done
 
   ### Get E-Mail Username
-  [ -r $APPDIR/.env ] && EMAILUSER=$(grep LB_EMAIL_DS_USERNAME "$APPDIR/.env" | tr -d "'" | cut -d"=" -f2)
+  [ -r $APPDIR/.env ] && EMAILUSER=$(grep "LB_EMAIL_DS_USERNAME=" "$APPDIR/.env" | tr -d "'" | cut -d"=" -f2)
   [ -z "$EMAILUSER" ] || [ "$EMAILUSER" == "null" ] && EMAILUSER="nobody"
   while [ 1 ]; do
     read -p "E-Mail Server Username ($EMAILUSER)? " NEMAILUSER
@@ -88,7 +90,7 @@ APPDIR=$HOMEDIR/Openframe-APIServer
   done
 
   ### Get E-Mail Password
-  [ -r $APPDIR/.env ] && EMAILPASS=$(grep LB_EMAIL_DS_PASSWORD "$APPDIR/.env" | tr -d "'" | cut -d"=" -f2)
+  [ -r $APPDIR/.env ] && EMAILPASS=$(grep "LB_EMAIL_DS_PASSWORD=" "$APPDIR/.env" | tr -d "'" | cut -d"=" -f2)
   [ "$EMAILPASS" == "null" ] && EMAILPASS=""
   while [ 1 ]; do
     local HIDDEN=""
@@ -100,51 +102,60 @@ APPDIR=$HOMEDIR/Openframe-APIServer
     break
   done
 
-  # The Pubsub server configuration
-  # Make sure the values match with PS_EXPOSED_URL
-  PS_HOST=$API_HOST
+  ### Get Pubsub server URL
+  [ -r $APPDIR/.env ] && PS_FULLURL=$(grep "PS_EXPOSED_URL=" "$APPDIR/.env" | tr -d "'" | cut -d"=" -f2 | cut -d"/" -f1-3)
+  [ -z "$PS_FULLURL" ] || [ "$PS_FULLURL" == "null" ] && PS_FULLURL="$API_FULLURL"
+  while [ 1 ]; do
+    read -p "URL to be used for the Pusub server ($PS_FULLURL)? " NPSFULLURL
+    [[ ! "$NPSFULLURL" =~ $URLPAT ]] && continue
+    [ ! -z "$NPSFULLURL" ] && PS_FULLURL=$NPSFULLURL
+    break
+  done
+
+  PS_SCHEMA=$(echo $PS_FULLURL | cut -d":" -f1)
+  PS_HOST=$(echo $PS_FULLURL | cut -d"/" -f3)
+  PS_DOMAINNAME=$(echo $PS_HOST | rev | cut -d'.' -f1-2 | rev)
+  PS_SERVERNAME=$(echo $PS_HOST | rev | cut -d'.' -f3- | rev)
+  # Openframe Pubsub host to use. The path used will always be /faye
+  PS_PATH='/faye'
+  PS_EXPOSED_URL="${PS_FULLURL}${PS_PATH}"
 
   ### Ask for Pubsub server port number
   [ -r $APPDIR/.env ] && PS_PORT=$(grep PS_PORT "$APPDIR/.env" | sed "s/.*='*\([0-9]\+\).*/\1/")
-  [ -z "$PS_PORT" ] || [ "$PS_PORT" == "null" ] && PS_PORT="8899"
+  [ -z "$PS_PORT" ] || [ "$PS_PORT" == "null" ] && PS_PORT="3001"
   while [ 1 ]; do
     read -p "Which port number should be used ($PS_PORT): " NPS_PORT
     [[ ! "$NPS_PORT" =~ (^[0-9]+$)|(^$) ]] && continue
+    [ ! -z $NPS_PORT ] && [ $NPS_PORT -gt 65535 ] && continue
     [ ! -z $NPS_PORT ] && PS_PORT=$NPS_PORT
     break
   done
 
-  # PS_EXPOSED_URL='https://oframe-ps.jabr.ch/faye'
-  [ -r $APPDIR/.env ] && PSURL=$(grep PS_EXPOSED_URL "$APPDIR/.env" | tr -d "'" | cut -d"=" -f2)
-  [ -z "$PSURL" ] || [ "$PSURL" == "null" ] && PSURL="https://$SERVERNAME-ps.${DOMAINNAME}"
-  while [ 1 ]; do
-    read -p "Full URL to be used for the pubsub server ($PSURL)? " NPSURL
-    [[ ! "$NPSURL" =~ $URLPAT ]] && continue
-    [ ! -z "$NPSURL" ] && PSURL=$NPSURL
-    break
-  done
-  PS_PATH='/faye'
-  PSURL="${PSURL}${PS_PATH}"
+  # [ -r $APPDIR/.env ] && PSURL=$(grep "PS_EXPOSED_URL=" "$APPDIR/.env" | tr -d "'" | cut -d"=" -f2)
+  # [ -z "$PSURL" ] || [ "$PSURL" == "null" ] && PSURL="https://$API_SERVERNAME-ps.${API_DOMAINNAME}"
+  # while [ 1 ]; do
+  #   read -p "Full URL to be used for the pubsub server ($PSURL)? " NPSURL
+  #   [[ ! "$NPSURL" =~ $URLPAT ]] && continue
+  #   [ ! -z "$NPSURL" ] && PSURL=$NPSURL
+  #   break
+  # done
+  # PS_PATH='/faye'
+  # [[ ! "$PSURL" =~ $PS_PATH$ ]] && PSURL="${PSURL}${PS_PATH}"
 
   PS_API_TOKEN=$(uuid)
 
   # The file to be used to persist the memory db if any
   # LB_DB_MEM_FILE="$APPDIR/openframe_data.json"
-  [ -r $APPDIR/.env ] && DBFILE=$(grep LB_DB_MEM_FILE "$APPDIR/.env" | tr -d "'" | cut -d"=" -f2)
+  [ -r $APPDIR/.env ] && DBFILE=$(grep "LB_DB_MEM_FILE=" "$APPDIR/.env" | tr -d "'" | cut -d"=" -f2)
   [ -z "$DBFILE" ] || [ "$DBFILE" == "null" ] && DBFILE="$APPDIR/openframe_data.json"
   while [ 1 ]; do
     read -p "Full path of the file based database ($DBFILE)? " NDBFILE
-    [[ ! "$NDBFILE" =~ [-a-zA-Z0-9_\.] ]] && continue
+    [[ ! "$NDBFILE" =~ (^[-a-zA-Z0-9/_.]+$)|(^$) ]] && continue
     [ ! -z "$NDBFILE" ] && DBFILE=$NDBFILE
     break
   done
 
   COOKIE_SECRECT=$(uuid)
-
-  echo -e "FULLURL: $FULLURL\nSCHEMA: $SCHEMA\nAPI_HOST: $API_HOST\nDOMAINNAME: $DOMAINNAME"
-  echo -e "SERVERNAME: $SERVERNAME\nAPI_EXPOSED_URL: $API_EXPOSED_URL\nAPI_PORT: $API_PORT"
-  echo -e "WEBAPP_EXPOSED_URL: $WEBAPPURL\nLB_EMAIL_DS_HOST: $EMAILHOST\nLB_EMAIL_DS_USERNAME: $EMAILUSER"
-  echo -e "LB_EMAIL_DS_PORT: $EMAILPORT\nLB_EMAIL_DS_PASSWORD: $EMAILPASS"
 } # get_apiserver_config
 
 #----------------------------------------------------------------------------
@@ -194,8 +205,62 @@ APPDIR=$HOMEDIR/Openframe-APIServer
 #----------------------------------------------------------------------------
 # Make sure the webapp configuration is initialized if needed
   echo -e "\n***** Installing initial configuration"
-  echo "Updating $APPDIR/.env"
-  # echo "API_HOST=$API_BASE/v0/" > "$APPDIR/.env"
+  if [ -r $APPDIR/.env ]; then
+    echo "Backing up $APPDIR/.env"
+    mv $APPDIR/.env $APPDIR/.env.bak
+  fi
+  echo "Writing $APPDIR/.env"
+
+cat > "$APPDIR/.env" <<EOF
+# Expose the API Server on this host and port
+# The path used will always be /v0
+API_HOST='$API_HOST'
+API_PORT=$API_PORT
+
+# External host URLs used for e-mail confirmation links
+# The server cannot be started without these being specified (can even be a dummy)
+API_EXPOSED_URL='$API_EXPOSED_URL'
+WEBAPP_EXPOSED_URL='$WEBAPPURL'
+
+# E-Mail Server configuration
+LB_EMAIL_DS_CONNECTOR='mail'
+LB_EMAIL_DS_NAME='Email'
+LB_EMAIL_DS_HOST='$EMAILHOST'
+LB_EMAIL_DS_TYPE='$LB_EMAIL_DS_TYPE'
+LB_EMAIL_DS_PORT=$EMAILPORT
+LB_EMAIL_DS_USERNAME='$EMAILUSER'
+LB_EMAIL_DS_PASSWORD='$EMAILPASS'
+
+# The Pubsub server configuration
+# These values have to match PS_EXPOSED_URL below
+PS_HOST='$PS_HOST'
+PS_PORT=$PS_PORT
+PS_PATH="/faye"
+PS_EXPOSED_URL='$PS_EXPOSED_URL'
+PS_API_TOKEN='$PS_API_TOKEN' # uuid
+
+# The file to be used to persist the memory db if any
+# This is not recommended for production use
+LB_DB_MEM_FILE='$DBFILE'
+
+# The database MongoDB server connector configuration
+# For explanations see https://loopback.io/doc/en/lb3/MongoDB-connector.html#connection-properties
+# LB_DB_DS_NAME='MongoDB'
+# Must be mongodb
+# LB_DB_DS_CONNECTOR='mongodb'
+# LB_DB_DS_DATABASE='openframe'
+# LB_DB_DS_DEBUG=''
+# LB_DB_DS_HOST='localhost'
+# MongoDB default port
+# LB_DB_DS_PORT=27019
+# Leave empty in most cases
+# LB_DB_DS_URL=''
+# LB_DB_DS_USERNAME=openframe
+# use 'openssl rand -base64 12' to create a password
+# LB_DB_DS_PASSWORD=RKSd7Rmi32yqNsKs
+
+COOKIE_SECRECT='$COOKIE_SECRECT' # uuid
+EOF
 } # install_config
 
 #----------------------------------------------------------------------------
@@ -212,7 +277,6 @@ APPDIR=$HOMEDIR/Openframe-APIServer
 # main
 #----------------------------------------------------------------------------
   get_apiserver_config
-  exit
 
   install_dpackage curl
   install_dpackage apache2
@@ -221,6 +285,6 @@ APPDIR=$HOMEDIR/Openframe-APIServer
   install_dpackage build-essential
   install_dpackage python
 
-  clone_apiserver
+  # clone_apiserver
   install_config
-  build_apiserver
+  # build_apiserver
