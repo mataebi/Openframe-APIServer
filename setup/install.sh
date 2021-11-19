@@ -285,6 +285,6 @@ EOF
   install_dpackage build-essential
   install_dpackage python
 
-  # clone_apiserver
+  clone_apiserver
   install_config
-  # build_apiserver
+  build_apiserver
