@@ -7,7 +7,7 @@ The Openframe API server
 To install the Openframe API server without the need to download anything first use the follwing
 command:
 ```
-bash <(curl -s https://raw.githubusercontent.com/mataebi/expand_rootfs/master/expand_rootfs)
+bash <(curl -s https://raw.githubusercontent.com/mataebi/Openframe-APIServer/master/setup/install.sh)
 ```
 
 ## Design Notes
