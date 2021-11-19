@@ -1,10 +1,16 @@
 # Openframe API
 
-The Openframe API server.
+The Openframe API server
 
-> Note: This repo is under active development. The API is likely to change.
+## Installation
 
-### Design Notes
+To install the Openframe API server without the need to download anything first use the follwing
+command:
+```
+bash <(curl -s https://raw.githubusercontent.com/mataebi/expand_rootfs/master/expand_rootfs)
+```
+
+## Design Notes
 
 This version of the API Server is built on [loopback](http://loopback.io/). The idea is to work towards a data model which supports the basic goals of Openframe, guided by a handful of [pilot use cases](https://github.com/OpenframeProject/Openframe-API/wiki/Pilot-Use-Cases).
 
@@ -15,7 +21,7 @@ At present, the API provides a basic RESTful interface to the data model. It rep
 The block diagram above represents a proposed architecture for the Openframe platform. It will continue to evolve as development on the project progresses.
 
 
-### Running an Openframe API Server
+## Running an Openframe API Server
 
 This package provides a cli which can be used to start up a server. Install the package with npm, and run `openframe-apiserver` to start it.
 
@@ -54,7 +60,7 @@ PS_HOST='pubsub.openframe.io'
 PS_PORT=2345
 ```
 
-### Local Development
+## Local Development
 
 The codebase was largely written following the [loopback docs'](https://docs.strongloop.com/display/public/LB/LoopBack) recommendations and examples. By default the API server will use an in-memory data store and will generate some dummy data (a few users, a few artworks). To run locally, clone the repo, install the npm dependencies, and run `npm start`.
 
@@ -69,10 +75,10 @@ $ npm start
 This repo includes the [pubsub server](https://github.com/OpenframeProject/Openframe-PubSubServer) as a dependency. Running `npm start` will spin up an instance of the pubsub server on port 8889. If you want to start only the API, run `npm run start-api`. Likewise, if you want to run only the pubsub server, run `npm run start-pubsub`.
 
 
-### REST API Docs
+## REST API Docs
 
 Loopback provides auto-generated documentation (via swagger) based on the data model definitions. After starting up the server locally, visit [localhost:8888/explorer/](http://localhost:8888/explorer/) to view the docs and test out the API.
 
-### License
+## License
 
 The code in this project is licensed under the GNU AGPLv3, a copyleft license that promotes server-based software freedom. For me info, see the description [here](https://choosealicense.com/licenses/agpl-3.0/), or take a look at the LICENSE included in the repo.
