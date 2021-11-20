@@ -177,7 +177,6 @@ APPDIR=$HOMEDIR/Openframe-APIServer
   done
 
   ### Ask for auto start at boot time
-  [ -r $OFRCFILE ] && OFRCDATA=$(cat $OFRCFILE)
   while [ 1 ]; do
     read -p "Do you want to autostart the api server at boot time (Y/n): " AUTOSTART
     [[ ! "$AUTOSTART" =~ (^[Yy][Ee]?[Ss]?$)|(^[Nn][Oo]?$)|(^$) ]] && continue
@@ -228,13 +227,20 @@ APPDIR=$HOMEDIR/Openframe-APIServer
 } # install_dpackage
 
 #----------------------------------------------------------------------------
- function clone_apiserver {
+ function get_apiserver {
 #----------------------------------------------------------------------------
-# Clone the API server repository
-  echo -e "\n***** Cloning Openframe API Server"
+# Clone or pull the API server repository
+  echo -e "\n***** Installing Openframe API Server"
   cd $HOMEDIR/
-  git clone --depth=1 --branch=master https://github.com/mataebi/Openframe-APIServer.git
-} # clone_apiserver
+  if [ ! -d $APPDIR/.git ]; then
+    echo "Cloning https://github.com/mataebi/Openframe-APIServer.git"
+    git clone --depth=1 --branch=master https://github.com/mataebi/Openframe-APIServer.git
+  else
+    echo "Updating from https://github.com/mataebi/Openframe-APIServer.git"
+    cd $APPDIR
+    git pull --depth=1
+  fi
+} # get_apiserver
 
 #----------------------------------------------------------------------------
  function install_config {
@@ -346,7 +352,7 @@ EOF
   install_dpackage build-essential
   install_dpackage python
 
-  clone_apiserver
+  get_apiserver
   install_config
   build_apiserver
   install_service
