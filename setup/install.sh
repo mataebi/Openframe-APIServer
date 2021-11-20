@@ -19,8 +19,8 @@ APPDIR=$HOMEDIR/Openframe-APIServer
       break
     done
 
-    if [[ $EXTROOTT =~ ^[Yy] ]]; then
-      curl -s https://raw.githubusercontent.com/mataebi/expand_rootfs/master/expand_rootfs | sudo
+    if [[ $EXTROOT =~ ^[Yy] ]]; then
+      curl -s https://raw.githubusercontent.com/mataebi/expand_rootfs/master/expand_rootfs | sudo bash
       exit 1
     fi
   fi
