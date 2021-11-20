@@ -349,3 +349,4 @@ EOF
   clone_apiserver
   install_config
   build_apiserver
+  install_service
