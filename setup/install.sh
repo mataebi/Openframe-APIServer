@@ -176,6 +176,21 @@ APPDIR=$HOMEDIR/Openframe-APIServer
     break
   done
 
+  ### Ask for auto start at boot time
+  [ -r $OFRCFILE ] && OFRCDATA=$(cat $OFRCFILE)
+  while [ 1 ]; do
+    read -p "Do you want to autostart the api server at boot time (Y/n): " AUTOSTART
+    [[ ! "$AUTOSTART" =~ (^[Yy][Ee]?[Ss]?$)|(^[Nn][Oo]?$)|(^$) ]] && continue
+    [ -z $AUTOSTART ] && AUTOSTART="Y"
+    break
+  done
+
+  if [[ $AUTOSTART =~ ^[Yy] ]]; then
+    AUTOSTART="true"
+  else
+    AUTOSTART="false"
+  fi
+
   COOKIE_SECRECT=$(uuid)
 } # get_apiserver_config
 
@@ -293,6 +308,29 @@ EOF
   npm install
   npm audit fix
 } # build_apiserver
+
+#----------------------------------------------------------------------------
+ function install_service {
+#----------------------------------------------------------------------------
+# Make sure the api server service is properly installed
+  echo -e "\n***** Installing api server service"
+
+  echo "Installing service at /lib/systemd/system/of-apiserver.service"
+  local SERVICE_FILE=/usr/lib/systemd/system/of-apiserver.service
+  sudo cp -p $APPDIR/setup/of-apiserver.service $SERVICE_FILE
+  sudo sed -i "s|<user>|$(id -un)|g" $SERVICE_FILE
+  sudo sed -i "s|<configdir>|$APPDIR|g" $SERVICE_FILE
+  sudo systemctl daemon-reload
+
+  if [ $AUTOSTART == "true" ]; then
+    echo "Enabling autostart of service"
+    sudo systemctl enable of-apiserver.service
+  else
+    echo "Disabling autostart of service"
+    sudo systemctl disable of-apiserver.service
+  fi
+  sudo systemctl enable systemd-networkd-wait-online.service
+} # install_service
 
 #----------------------------------------------------------------------------
 # main

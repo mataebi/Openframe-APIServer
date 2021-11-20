@@ -1,0 +1,27 @@
+# Copy this file to /lib/systemd/system/of-apiserver.service then run
+# sudo systemctl enable systemd-networkd-wait-online.service
+# sudo systemctl enable of-apiserver
+# sudo reboot
+
+[Unit]
+Description=Openframe API Server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=<user>
+PIDFile=/run/ofapiserver.pid
+EnvironmentFile=<configdir>/.env
+# WorkingDirectory=<appdir>
+
+# Some possible values for logging are
+# Environment="DEBUG=openframe:*"
+# Environment="DEBUG=loopback:*"
+Environment="DEBUG=*"
+# Environment="SERVICE=true"
+ExecStartPre=/bin/sleep 3
+ExecStart=npm start
+
+[Install]
+WantedBy=multi-user.target
