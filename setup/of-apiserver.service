@@ -12,8 +12,8 @@ Wants=network-online.target
 Type=simple
 User=<user>
 PIDFile=/run/ofapiserver.pid
-EnvironmentFile=<configdir>/.env
-# WorkingDirectory=<appdir>
+# EnvironmentFile=<configdir>/.env
+WorkingDirectory=<appdir>
 
 # Some possible values for logging are
 # Environment="DEBUG=openframe:*"

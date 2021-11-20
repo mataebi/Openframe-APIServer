@@ -13,7 +13,7 @@ APPDIR=$HOMEDIR/Openframe-APIServer
   if [ $FREESPC -lt 1048576 ]; then
     echo "Please make sure there are a least 2 GByte of free diskspace available"
     while [ 1 ]; do
-      read -p "Do you want to try the extend the root filesystem to its maximum size (Y/n): " EXTROOT
+      read -p "Do you want to try the extend the root filesystem to its maximum size (y/N): " EXTROOT
       [[ ! "$EXTROOT" =~ (^[Yy][Ee]?[Ss]?$)|(^[Nn][Oo]?$)|(^$) ]] && continue
       [ -z $EXTROOT ] && EXTROOT="N"
       break
@@ -325,7 +325,8 @@ EOF
   local SERVICE_FILE=/usr/lib/systemd/system/of-apiserver.service
   sudo cp -p $APPDIR/setup/of-apiserver.service $SERVICE_FILE
   sudo sed -i "s|<user>|$(id -un)|g" $SERVICE_FILE
-  sudo sed -i "s|<configdir>|$APPDIR|g" $SERVICE_FILE
+  # sudo sed -i "s|<configdir>|$APPDIR|g" $SERVICE_FILE
+  sudo sed -i "s|<appdir>|$APPDIR|g" $SERVICE_FILE
   sudo systemctl daemon-reload
 
   if [ $AUTOSTART == "true" ]; then
