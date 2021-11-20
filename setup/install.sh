@@ -6,6 +6,27 @@ HOMEDIR=$(ls -d ~)
 APPDIR=$HOMEDIR/Openframe-APIServer
 
 #----------------------------------------------------------------------------
+ function check_diskspace {
+#----------------------------------------------------------------------------
+# Make sure there is enough space to install the Openframe Frameconroller
+  FREESPC=$(df / | tail -1 | tr -s " " | cut -d' ' -f4)
+  if [ $FREESPC -lt 1048576 ]; then
+    echo "Please make sure there are a least 2 GByte of free diskspace available"
+    while [ 1 ]; do
+      read -p "Do you want to try the extend the root filesystem to its maximum size (Y/n): " EXTROOT
+      [[ ! "$EXTROOT" =~ (^[Yy][Ee]?[Ss]?$)|(^[Nn][Oo]?$)|(^$) ]] && continue
+      [ -z $EXTROOT ] && EXTROOT="N"
+      break
+    done
+
+    if [[ $EXTROOTT =~ ^[Yy] ]]; then
+      curl -s https://raw.githubusercontent.com/mataebi/expand_rootfs/master/expand_rootfs | sudo
+      exit 1
+    fi
+  fi
+} # check_diskspace
+
+#----------------------------------------------------------------------------
  function get_apiserver_config {
 #----------------------------------------------------------------------------
 # Get the information needed to configure the api server
@@ -276,6 +297,8 @@ EOF
 #----------------------------------------------------------------------------
 # main
 #----------------------------------------------------------------------------
+  check_diskspace
+
   get_apiserver_config
 
   install_dpackage curl
