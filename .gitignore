@@ -9,6 +9,7 @@ coverage/*
 
 .DS_Store
 .env
+.env.backup
 
 openframe_data.json
 
