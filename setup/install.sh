@@ -11,7 +11,7 @@ APPDIR=$HOMEDIR/Openframe-APIServer
 # Make sure there is enough space to install the Openframe Frameconroller
   FREESPC=$(df / | tail -1 | tr -s " " | cut -d' ' -f4)
   if [ $FREESPC -lt 1048576 ]; then
-    echo "Please make sure there are a least 2 GByte of free diskspace available"
+    echo "Please make sure there are a least 1 GByte of free diskspace available"
     while [ 1 ]; do
       read -p "Do you want to try the extend the root filesystem to its maximum size (y/N): " EXTROOT
       [[ ! "$EXTROOT" =~ (^[Yy][Ee]?[Ss]?$)|(^[Nn][Oo]?$)|(^$) ]] && continue
