@@ -64,18 +64,18 @@ APPDIR=$HOMEDIR/Openframe-APIServer
   done
 
   # Ask for the SSL certificate path
-  CERTPATH=/etc/ssl/certs/$FULLNAME.crt
+  API_CERTPATH=/etc/ssl/certs/$API_HOST.crt
   while [ 1 ]; do
-    read -p "Where can the SSL certificate be found ($CERTPATH): " NCERTPATH
-    [ ! -z $NCERTPATH ] && CERTPATH=$NCERTPATH
+    read -p "Where can the SSL certificate be found ($API_CERTPATH): " NCERTPATH
+    [ ! -z $NCERTPATH ] && API_CERTPATH=$NCERTPATH
     break
   done
 
   # Ask for the SSL private key path
-  KEYPATH=/etc/ssl/private/$FULLNAME.key
+  API_KEYPATH=/etc/ssl/private/$API_HOST.key
   while [ 1 ]; do
-    read -p "Where can the SSL private key be found ($KEYPATH): " NKEYPATH
-    [ ! -z $NKEYPATH ] && KEYPATH=$NKEYPATH
+    read -p "Where can the SSL private key be found ($API_KEYPATH): " NKEYPATH
+    [ ! -z $NKEYPATH ] && API_KEYPATH=$NKEYPATH
     break
   done
 
@@ -165,6 +165,22 @@ APPDIR=$HOMEDIR/Openframe-APIServer
     [[ ! "$NPS_PORT" =~ (^[0-9]+$)|(^$) ]] && continue
     [ ! -z $NPS_PORT ] && [ $NPS_PORT -gt 65535 ] && continue
     [ ! -z $NPS_PORT ] && PS_PORT=$NPS_PORT
+    break
+  done
+
+  # Ask for the SSL certificate path
+  PS_CERTPATH=/etc/ssl/certs/$PS_HOST.crt
+  while [ 1 ]; do
+    read -p "Where can the SSL certificate be found ($PS_CERTPATH): " NCERTPATH
+    [ ! -z $NCERTPATH ] && PS_CERTPATH=$NCERTPATH
+    break
+  done
+
+  # Ask for the SSL private key path
+  PS_KEYPATH=/etc/ssl/private/$PS_HOST.key
+  while [ 1 ]; do
+    read -p "Where can the SSL private key be found ($PS_KEYPATH): " NKEYPATH
+    [ ! -z $NKEYPATH ] && PS_KEYPATH=$NKEYPATH
     break
   done
 
@@ -361,8 +377,8 @@ EOF
 # Install and activate the  proxy server config for the API and the PubSub service
   local DSTFILE=/etc/apache2/sites-available/$API_HOST.conf
   sudo cp -p $APPDIR/setup/apiserver.example.com-ssl.conf $DSTFILE
-  sudo sed -i "s|<certpath>|$CERTPATH|g" $DSTFILE
-  sudo sed -i "s|<keypath>|$KEYPATH|g" $DSTFILE
+  sudo sed -i "s|<certpath>|$API_CERTPATH|g" $DSTFILE
+  sudo sed -i "s|<keypath>|$API_KEYPATH|g" $DSTFILE
 
   # Adjust the api server apache config file
   sudo sed -i "s|<apifullname>|$API_HOST|g" $DSTFILE
@@ -372,8 +388,8 @@ EOF
 
   DSTFILE=/etc/apache2/sites-available/$PS_HOST.conf
   sudo cp -p $APPDIR/setup/pubsubserver.example.com-ssl.conf $DSTFILE
-  sudo sed -i "s|<certpath>|$CERTPATH|g" $DSTFILE
-  sudo sed -i "s|<keypath>|$KEYPATH|g" $DSTFILE
+  sudo sed -i "s|<certpath>|$PS_CERTPATH|g" $DSTFILE
+  sudo sed -i "s|<keypath>|$PS_KEYPATH|g" $DSTFILE
 
   # Adjust the pubsub server apache config file
   sudo sed -i "s|<psfullname>|$PS_HOST|g" $DSTFILE
@@ -439,4 +455,3 @@ EOF
   echo '*                                                           *'
   echo '*************************************************************'
   echo
-
