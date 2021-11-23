@@ -52,7 +52,7 @@ APPDIR=$HOMEDIR/Openframe-APIServer
   API_PATH="/v0"
   API_EXPOSED_URL="${API_FULLURL}${API_PATH}"
 
-  ### Ask for API server port number
+  ### Ask for "internal" API server port number
   [ -r $APPDIR/.env ] && API_PORT=$(grep API_PORT "$APPDIR/.env" | sed "s/.*='*\([0-9]\+\).*/\1/")
   [ -z "$API_PORT" ] || [ "$API_PORT" == "null" ] && API_PORT="3000"
   while [ 1 ]; do
@@ -60,6 +60,22 @@ APPDIR=$HOMEDIR/Openframe-APIServer
     [[ ! "$NAPI_PORT" =~ (^[0-9]+$)|(^$) ]] && continue
     [ ! -z $NAPI_PORT ] && [ $NAPI_PORT -gt 65535 ] && continue
     [ ! -z $NAPI_PORT ] && API_PORT=$NAPI_PORT
+    break
+  done
+
+  # Ask for the SSL certificate path
+  CERTPATH=/etc/ssl/certs/$FULLNAME.crt
+  while [ 1 ]; do
+    read -p "Where can the SSL certificate be found ($CERTPATH): " NCERTPATH
+    [ ! -z $NCERTPATH ] && CERTPATH=$NCERTPATH
+    break
+  done
+
+  # Ask for the SSL private key path
+  KEYPATH=/etc/ssl/private/$FULLNAME.key
+  while [ 1 ]; do
+    read -p "Where can the SSL private key be found ($KEYPATH): " NKEYPATH
+    [ ! -z $NKEYPATH ] && KEYPATH=$NKEYPATH
     break
   done
 
@@ -342,27 +358,31 @@ EOF
 #----------------------------------------------------------------------------
  function install_proxies {
 #----------------------------------------------------------------------------
-  DSTFILE=/etc/apache2/sites-available/$APIFULLNAME.conf
+# Install and activate the  proxy server config for the API and the PubSub service
+  local DSTFILE=/etc/apache2/sites-available/$API_HOST.conf
   sudo cp -p $APPDIR/setup/apiserver.example.com-ssl.conf $DSTFILE
   sudo sed -i "s|<certpath>|$CERTPATH|g" $DSTFILE
   sudo sed -i "s|<keypath>|$KEYPATH|g" $DSTFILE
 
   # Adjust the api server apache config file
-  sudo sed -i "s|<apiport>|$APIPORTNR|g" $DSTFILE
-  sudo sed -i "s|<apifullname>|$APIFULLNAME|g" $DSTFILE
+  sudo sed -i "s|<apifullname>|$API_HOST|g" $DSTFILE
+  sudo sed -i "s|<apiport>|$API_PORT|g" $DSTFILE
 
-  DSTFILE=/etc/apache2/sites-available/$PSFULLNAME.conf
+  [ ! -r $DSTFILE ] && sudo /usr/sbin/a2ensite $API_HOST.conf
+
+  DSTFILE=/etc/apache2/sites-available/$PS_HOST.conf
   sudo cp -p $APPDIR/setup/pubsubserver.example.com-ssl.conf $DSTFILE
   sudo sed -i "s|<certpath>|$CERTPATH|g" $DSTFILE
   sudo sed -i "s|<keypath>|$KEYPATH|g" $DSTFILE
 
   # Adjust the pubsub server apache config file
-  sudo sed -i "s|<psport>|$PSPORTNR|g" $DSTFILE
-  sudo sed -i "s|<psfullname>|$PSFULLNAME|g" $DSTFILE
+  sudo sed -i "s|<psfullname>|$PS_HOST|g" $DSTFILE
+  sudo sed -i "s|<psport>|$PS_PORT|g" $DSTFILE
 
-  [ ! -r /etc/apache2/sites-enabled/$PSFULLNAME.conf ] && sudo /usr/sbin/a2ensite $PSFULLNAME.conf
+  [ ! -r $DSTFILE ] && sudo /usr/sbin/a2ensite $PS_HOST.conf
 
   sudo a2enmod ssl
+  sudo a2enmod rewrite
   sudo service apache2 restart
 } # install_proxies
 
