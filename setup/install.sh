@@ -375,7 +375,10 @@ EOF
  function install_proxies {
 #----------------------------------------------------------------------------
 # Install and activate the  proxy server config for the API and the PubSub service
+  echo -e "\n***** Installing proxy server configurations"
+
   local DSTFILE=/etc/apache2/sites-available/$API_HOST.conf
+  echo -e "Setting up API proxy at $DSTFILE"
   sudo cp -p $APPDIR/setup/apiserver.example.com-ssl.conf $DSTFILE
   sudo sed -i "s|<certpath>|$API_CERTPATH|g" $DSTFILE
   sudo sed -i "s|<keypath>|$API_KEYPATH|g" $DSTFILE
@@ -387,6 +390,7 @@ EOF
   [ ! -r $DSTFILE ] && sudo /usr/sbin/a2ensite $API_HOST.conf
 
   DSTFILE=/etc/apache2/sites-available/$PS_HOST.conf
+  echo -e "\nSetting up PubSub proxy at $DSTFILE"
   sudo cp -p $APPDIR/setup/pubsubserver.example.com-ssl.conf $DSTFILE
   sudo sed -i "s|<certpath>|$PS_CERTPATH|g" $DSTFILE
   sudo sed -i "s|<keypath>|$PS_KEYPATH|g" $DSTFILE
