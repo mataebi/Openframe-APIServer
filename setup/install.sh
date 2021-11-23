@@ -387,7 +387,7 @@ EOF
   sudo sed -i "s|<apifullname>|$API_HOST|g" $DSTFILE
   sudo sed -i "s|<apiport>|$API_PORT|g" $DSTFILE
 
-  [ ! -r $DSTFILE ] && sudo /usr/sbin/a2ensite $API_HOST.conf
+  [ -r $DSTFILE ] && sudo /usr/sbin/a2ensite $API_HOST.conf
 
   DSTFILE=/etc/apache2/sites-available/$PS_HOST.conf
   echo -e "\nSetting up PubSub proxy at $DSTFILE"
@@ -399,7 +399,7 @@ EOF
   sudo sed -i "s|<psfullname>|$PS_HOST|g" $DSTFILE
   sudo sed -i "s|<psport>|$PS_PORT|g" $DSTFILE
 
-  [ ! -r $DSTFILE ] && sudo /usr/sbin/a2ensite $PS_HOST.conf
+  [ -r $DSTFILE ] && sudo /usr/sbin/a2ensite $PS_HOST.conf
 
   sudo a2enmod ssl
   sudo a2enmod rewrite
