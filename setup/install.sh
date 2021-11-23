@@ -399,10 +399,10 @@ EOF
 
   install_dpackage curl
   install_dpackage apache2
-  install_nodejs
   install_dpackage git
-  install_dpackage build-essential
   install_dpackage python
+  install_dpackage build-essential
+  install_nodejs
 
   get_apiserver
   install_config
