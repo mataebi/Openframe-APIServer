@@ -340,6 +340,57 @@ EOF
 } # install_service
 
 #----------------------------------------------------------------------------
+ function install_proxies {
+#----------------------------------------------------------------------------
+  DSTFILE=/etc/apache2/sites-available/$APIFULLNAME.conf
+  sudo cp -p $APPDIR/setup/apiserver.example.com-ssl.conf $DSTFILE
+  sudo sed -i "s|<certpath>|$CERTPATH|g" $DSTFILE
+  sudo sed -i "s|<keypath>|$KEYPATH|g" $DSTFILE
+
+  # Adjust the api server apache config file
+  sudo sed -i "s|<apiport>|$APIPORTNR|g" $DSTFILE
+  sudo sed -i "s|<apifullname>|$APIFULLNAME|g" $DSTFILE
+
+  DSTFILE=/etc/apache2/sites-available/$PSFULLNAME.conf
+  sudo cp -p $APPDIR/setup/pubsubserver.example.com-ssl.conf $DSTFILE
+  sudo sed -i "s|<certpath>|$CERTPATH|g" $DSTFILE
+  sudo sed -i "s|<keypath>|$KEYPATH|g" $DSTFILE
+
+  # Adjust the pubsub server apache config file
+  sudo sed -i "s|<psport>|$PSPORTNR|g" $DSTFILE
+  sudo sed -i "s|<psfullname>|$PSFULLNAME|g" $DSTFILE
+
+  [ ! -r /etc/apache2/sites-enabled/$PSFULLNAME.conf ] && sudo /usr/sbin/a2ensite $PSFULLNAME.conf
+
+  sudo a2enmod ssl
+  sudo service apache2 restart
+} # install_proxies
+
+#----------------------------------------------------------------------------
+ function centertxt {
+#----------------------------------------------------------------------------
+  [ ! "$TXT" == " " ] && TXT="$TXT\n"
+  LEN=$(( ($WIDTH - ${#1} - 4) / 2 - 1 ))
+  TXT=$(perl -e "print (\"$TXT\", \" \"x$LEN, \"$1\");")
+} # centertxt
+
+#----------------------------------------------------------------------------
+ function final_message {
+#----------------------------------------------------------------------------
+  WIDTH=70
+  HEIGHT=12
+  TXT=" "
+
+  centertxt "Installation complete. To start the API server execute"
+  TXT="$TXT\n"
+  centertxt "'sudo service of-apiserver start'"
+  TXT="$TXT\n"
+  centertxt "then wait a few seconds for the service to start"
+
+  whiptail --msgbox "$TXT" $HEIGHT $WIDTH
+} # final_message
+
+#----------------------------------------------------------------------------
 # main
 #----------------------------------------------------------------------------
   check_diskspace
@@ -357,3 +408,15 @@ EOF
   install_config
   build_apiserver
   install_service
+  install_proxies
+
+  echo
+  echo '*************************************************************'
+  echo '*                                                           *'
+  echo '*  Installation complete. To start the API server execute   *'
+  echo '*             "sudo service of-apiserver start"             *'
+  echo '*     then wait a few seconds for the service to start     *'
+  echo '*                                                           *'
+  echo '*************************************************************'
+  echo
+
